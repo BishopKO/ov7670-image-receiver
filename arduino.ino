@@ -1,47 +1,32 @@
 #include <ov7670_camera.h>
 
+// Create an instance of Camera Library
+Camera camera;
+
 void setup() {
-  
-  DDRB |= (1 << 3);//pin 11
-   ASSR &= ~(_BV(EXCLK) | _BV(AS2));
-   TCCR2A = (1 << COM2A0) | (1 << WGM21) | (1 << WGM20);
-   TCCR2B = (1 << WGM22) | (1 << CS20);
-   OCR2A = 0;//(F_CPU)/(2*(X+1))
-   DDRC &= ~15;//low d0-d3 camera // 00001111
-   DDRD &= ~252;//d7-d4 and interrupt pins // 11111100
-   _delay_ms(3000);
-  
-     //set up twi for 100khz
-   TWSR &= ~3;//disable prescaler for TWI
-   TWBR = 72;//set to 100khz
-//   UBRR0H = 0;
-//   UBRR0L = 0;//0 = 2M baud rate. 1 = 1M baud. 3 = 0.5M. 7 = 250k 207 is 9600 baud rate.
-//   UCSR0A |= 2;//double speed aysnc
-//   UCSR0B = (1 << RXEN0) | (1 << TXEN0);//Enable receiver and transmitter
-//   UCSR0C = 6;//async 1 stop bit 8bit char no parity bits
-  Serial.begin(1000000);
-  pinMode(LED_BUILTIN, OUTPUT);
-  digitalWrite(LED_BUILTIN, LOW);
+  Serial.begin(1000000); // We want to communicate at 1M Baud rate
+  pinMode(LED_BUILTIN, OUTPUT); // We want to use the built-in LED as an output
+  digitalWrite(LED_BUILTIN, LOW); // Set the built-in LED to LOW (OFF)
   while (!Serial) {
-    delay(200);
+    delay(200); // Just check if Serial communication is ready
   }
-  setup_camera();
-  Serial.print("RDY");
-  digitalWrite(LED_BUILTIN, HIGH);
+  camera.setup_arduino(); // Setup Arduino ports to communicate with the camera module
+  camera.setup_camera(); // Setup the camera module to communicate with Arduino
+  Serial.print("RDY"); // Send "RDY" message to PC
+  digitalWrite(LED_BUILTIN, HIGH); // Set the built-in LED to HIGH (ON)
 }
 
 void loop() {
-  if(Serial.available()){
-    Serial.read();
-    flicker(2);   
-    digitalWrite(LED_BUILTIN, LOW);
-    //cli();
-    capture_and_transmit_image();
-    //sei();
-    Serial.print("OK BYE ***");
-    Serial.flush();
-    flicker(5);
-    Serial.print("RDY");
+  if(Serial.available()) {
+    // If there is some data sent from computer
+    Serial.read(); // Read the character, and forget it
+    flicker(2); // Flicker the LED two times
+    digitalWrite(LED_BUILTIN, LOW); // Turn off the LED, Indicating image is being sent
+    camera.capture_and_transmit(320, 240); // Capture a 320x240 image and pass it to computer
+    Serial.print("OK BYE ***"); // Send "OK BYE ***" to computer
+    Serial.flush(); // Make sure we send everything, nothing should remain in buffer
+    flicker(5); // Blink the LED 5 times
+    Serial.print("RDY"); // Send the "RDY" message again, saying, Hey, we're ready again
   }
   delay(200);
 }

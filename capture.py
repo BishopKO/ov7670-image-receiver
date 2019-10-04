@@ -24,7 +24,7 @@ def read_image(serial):
   image.save('./image.bmp')
 
   ok = serial.read_until('***')
-  print("Arduino says {}".format(ok))
+  print(("Arduino says {}".format(ok)))
 
 ser = serial.Serial(
   port=port,
@@ -33,19 +33,19 @@ ser = serial.Serial(
   stopbits=serial.STOPBITS_ONE,
   bytesize=serial.EIGHTBITS)
 
-print 'Wait for Arduino to set itself up...'
+print('Wait for Arduino to set itself up...')
 time.sleep(5)
 
 if ser.isOpen() == False:
   ser.open()
-  print 'Serial opened'
+  print('Serial opened')
 else:
-  print 'Serial already open'
+  print('Serial already open')
 
 
 while True:
   print("Waiting for RDY from Arduino...")
-  print("Arduino says {}".format(ser.read_until('RDY')))
+  print(("Arduino says {}".format(ser.read_until('RDY'))))
   inp = raw_input('Hit enter to fetch image, any other key to exit >')
   if inp == "":
     ser.write('X')
@@ -55,4 +55,4 @@ while True:
     break
 
 ser.close()
-print 'Serial closed'
+print('Serial closed')
