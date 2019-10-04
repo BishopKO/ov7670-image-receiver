@@ -1,20 +1,16 @@
 import serial
 from PIL import Image
 import time
+import sys
 
-port=raw_input("Which serial port to communicate on?")
-print(port)
+if len(sys.argv) > 1:
+  port = sys.argv[1]
+else:
+  port=raw_input("Which serial port to communicate on?")
+
+print("Using port {}".format(port))
 width=320
 height=240
-
-def is_image_start(serial, index = 0):
-  if index < len(pattern):
-    if serial.read() == pattern[index]:
-      return is_image_start(serial, index + 1)
-    else:
-      return False
-  else:
-    return True
 
 def read_image(serial):
   print("Reading Image...")
